@@ -56,16 +56,18 @@ The C# API calls the Anthropic Messages API (streaming + tool use). The key neve
 Tools: `search_products`, `check_stock`, `get_return_policy`, and for logged-in users `list_my_orders` and
 `get_order_status` (which only returns the caller's own orders). Chat transcripts are stored in Postgres.
 
-Three modes:
+Four ways to run it (set in `.env`):
 
-1. **Real Claude**: set `ANTHROPIC_API_KEY` in `.env` (model via `CHAT_MODEL`, default `claude-haiku-5-5`).
-2. **Fake LLM, free and deterministic**: `node scripts/mock-anthropic.mjs`, then in `.env` set
-   `ANTHROPIC_API_KEY=mock` and `ANTHROPIC_BASE_URL=http://host.docker.internal:9090/`. It triggers tools by keyword
-   (an order number like `GS-1002`, "order", "return", "stock"), so the tool loop and the UI can be tested without spending tokens.
-3. **No key**: the widget replies "the support chatbot isn't configured".
+1. **Anthropic API directly**: `ANTHROPIC_API_KEY=...` (model via `CHAT_MODEL`, default `claude-haiku-5-5`).
+2. **An AI gateway** (e.g. Netlight's): set `ANTHROPIC_BASE_URL=https://llm.netlight.ai/`, `ANTHROPIC_AUTH_TOKEN=<token>`
+   (sent as a Bearer header) and `CHAT_MODEL` to a model name the gateway offers, e.g. `claude-haiku-latest`.
+   List them with `curl https://llm.netlight.ai/v1/models -H "Authorization: Bearer $TOKEN"`.
+3. **Fake LLM, free and deterministic**: `node scripts/mock-anthropic.mjs`, then set `ANTHROPIC_API_KEY=mock` and
+   `ANTHROPIC_BASE_URL=http://host.docker.internal:9090/`. It triggers tools by keyword (an order number like `GS-1002`,
+   "order", "return", "stock"), so the tool loop and the UI can be tested without spending tokens.
+4. **Nothing set**: the widget replies "the support chatbot isn't configured".
 
-> The streaming/tool-use code is verified against the fake LLM, not yet against the real Anthropic API.
-> Try one real conversation after adding a key.
+Verified end to end with real Claude through the Netlight gateway (tool calls, ownership check, both chat bugs).
 
 ## Admin API (for Eva / test scripts)
 
@@ -145,7 +147,7 @@ compose…). Vercel is not an option as-is: it hosts Next.js but cannot run the 
 - **web** image (`apps/web/Dockerfile`, build context = repo root): set `API_URL` (internal URL of the API) and
   `COOKIE_SECURE=true` once served over HTTPS.
 - **api** image (`backend/src/GymShop.Api/Dockerfile`, build context = `backend/`): set `DATABASE_URL`, a long random
-  `JWT_SECRET`, `ADMIN_API_KEY` (or leave empty to disable the admin API), `ANTHROPIC_API_KEY`, `CHAT_MODEL`.
+  `JWT_SECRET`, `ADMIN_API_KEY` (or leave empty to disable the admin API), `ANTHROPIC_API_KEY` (or `ANTHROPIC_AUTH_TOKEN` + `ANTHROPIC_BASE_URL`), `CHAT_MODEL`.
   The API only needs to be reachable by the web app; keep port 5080 / admin private unless Eva has to reach it.
 - **Postgres**: managed instance or container with a volume.
 - The built-in default for `JWT_SECRET` and `ADMIN_API_KEY` is for local use only.

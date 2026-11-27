@@ -29,6 +29,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-at-least-32-characters-long}
       ADMIN_API_KEY: ${ADMIN_API_KEY:-dev-admin-key}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_AUTH_TOKEN: ${ANTHROPIC_AUTH_TOKEN:-} # Bearer token, for an AI gateway
       CHAT_MODEL: ${CHAT_MODEL:-claude-haiku-5-5}
       ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL:-} # point at scripts/mock-anthropic.mjs: http://host.docker.internal:9090/
       BUGS: ${BUGS:-}
