@@ -1,0 +1,14 @@
+stack: node
+packageManager: pnpm
+commit: 9ad18cfe3c85e2d990ac2261cb5e8155d51c041b
+verifiedAt: 2026-11-27T14:01:07.037Z
+commands:
+  install: corepack pnpm@9.15.9 install --frozen-lockfile
+  build: corepack pnpm@9.15.9 run build
+  analyze: corepack pnpm@9.15.9 run lint
+  test: corepack pnpm@9.15.9 run test
+status:
+  install: none
+  build: none
+  analyze: none
+  test: none

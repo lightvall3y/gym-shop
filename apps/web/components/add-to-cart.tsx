@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ProductDetail } from "@/lib/types";
 import { useCart } from "./cart-provider";
 
+// @uxid apps/web/components/add-to-cart::AddToCart
 export function AddToCart({ product }: { product: ProductDetail }) {
   const { add } = useCart();
   const colors = useMemo(() => [...new Set(product.variants.map((v) => v.color))], [product]);
@@ -39,11 +40,11 @@ export function AddToCart({ product }: { product: ProductDetail }) {
   return (
     <div className="space-y-5">
       {colors.length > 1 && (
-        <fieldset>
+        <fieldset /* @uxid apps/web/components/add-to-cart::AddToCart.fieldset */>
           <legend className="label">Colour: {color}</legend>
           <div className="flex gap-2">
             {colors.map((c) => (
-              <button
+              <button /* @uxid apps/web/components/add-to-cart::AddToCart.button */
                 key={c}
                 type="button"
                 onClick={() => {
@@ -61,11 +62,11 @@ export function AddToCart({ product }: { product: ProductDetail }) {
         </fieldset>
       )}
 
-      <fieldset>
+      <fieldset /* @uxid apps/web/components/add-to-cart::AddToCart.fieldset-2 */>
         <legend className="label">Size{selected ? `: ${selected.size}` : ""}</legend>
         <div className="flex flex-wrap gap-2">
           {variants.map((v) => (
-            <button
+            <button /* @uxid apps/web/components/add-to-cart::AddToCart.button-2 */
               key={v.id}
               type="button"
               disabled={v.stock === 0}
@@ -92,27 +93,27 @@ export function AddToCart({ product }: { product: ProductDetail }) {
 
       <div className="flex items-end gap-3">
         <div>
-          <label htmlFor="qty" className="label">
+          <label /* @uxid apps/web/components/add-to-cart::AddToCart.label */ htmlFor="qty" className="label">
             Quantity
           </label>
-          <select id="qty" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="input w-20" data-testid="quantity">
+          <select /* @uxid apps/web/components/add-to-cart::AddToCart.select */ id="qty" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="input w-20" data-testid="quantity">
             {Array.from({ length: Math.min(selected?.stock || 10, 10) }, (_, i) => i + 1).map((n) => (
-              <option key={n} value={n}>
+              <option /* @uxid apps/web/components/add-to-cart::AddToCart.option */ key={n} value={n}>
                 {n}
               </option>
             ))}
           </select>
         </div>
-        <button type="button" onClick={onAdd} disabled={busy} className="btn btn-primary flex-1 py-3" data-testid="add-to-cart">
+        <button /* @uxid apps/web/components/add-to-cart::AddToCart.button-3 */ type="button" onClick={onAdd} disabled={busy} className="btn btn-primary flex-1 py-3" data-testid="add-to-cart">
           {busy ? "Adding…" : "Add to cart"}
         </button>
       </div>
 
       {feedback && (
-        <p role="status" className={`rounded-md p-3 text-sm ${feedback.ok ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`} data-testid="add-to-cart-feedback">
+        <p /* @uxid apps/web/components/add-to-cart::AddToCart.p */ role="status" className={`rounded-md p-3 text-sm ${feedback.ok ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`} data-testid="add-to-cart-feedback">
           {feedback.text}{" "}
           {feedback.ok && (
-            <Link href="/cart" className="font-semibold underline" data-testid="go-to-cart">
+            <Link /* @uxid apps/web/components/add-to-cart::AddToCart.link */ href="/cart" className="font-semibold underline" data-testid="go-to-cart">
               View cart
             </Link>
           )}

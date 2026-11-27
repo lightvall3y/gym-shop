@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth-provider";
 import { api, ApiError, eur } from "@/lib/api";
 import type { Order } from "@/lib/types";
 
+// @uxid apps/web/app/account/page::AccountPage
 export default function AccountPage() {
   return (
     <Suspense fallback={<p className="py-10 text-center text-zinc-500">Loading…</p>}>
@@ -15,12 +16,14 @@ export default function AccountPage() {
   );
 }
 
+// @uxid apps/web/app/account/page::AccountContent
 function AccountContent() {
   const { user, loading } = useAuth();
   if (loading) return <p className="py-10 text-center text-zinc-500">Loading…</p>;
   return user ? <Profile /> : <AuthForms />;
 }
 
+// @uxid apps/web/app/account/page::AuthForms
 function AuthForms() {
   const { login, register } = useAuth();
   const router = useRouter();
@@ -51,9 +54,9 @@ function AuthForms() {
 
   return (
     <div className="mx-auto max-w-md">
-      <div className="mb-4 flex rounded-md bg-zinc-200 p-1" role="tablist">
+      <div /* @uxid apps/web/app/account/page::AuthForms.div */ className="mb-4 flex rounded-md bg-zinc-200 p-1" role="tablist">
         {(["login", "register"] as const).map((m) => (
-          <button
+          <button /* @uxid apps/web/app/account/page::AuthForms.button */
             key={m}
             role="tab"
             aria-selected={mode === m}
@@ -69,27 +72,27 @@ function AuthForms() {
         ))}
       </div>
 
-      <form onSubmit={submit} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6" data-testid={`${mode}-form`}>
+      <form /* @uxid apps/web/app/account/page::AuthForms.form */ onSubmit={submit} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6" data-testid={`${mode}-form`}>
         <h1 className="text-xl font-bold">{mode === "login" ? "Welcome back" : "Create your account"}</h1>
         {mode === "register" && (
           <div>
-            <label htmlFor="name" className="label">
+            <label /* @uxid apps/web/app/account/page::AuthForms.label */ htmlFor="name" className="label">
               Full name
             </label>
-            <input id="name" className="input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required autoComplete="name" data-testid="register-name" />
+            <input /* @uxid apps/web/app/account/page::AuthForms.input */ id="name" className="input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required autoComplete="name" data-testid="register-name" />
           </div>
         )}
         <div>
-          <label htmlFor="email" className="label">
+          <label /* @uxid apps/web/app/account/page::AuthForms.label-2 */ htmlFor="email" className="label">
             Email
           </label>
-          <input id="email" type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" data-testid="auth-email" />
+          <input /* @uxid apps/web/app/account/page::AuthForms.email */ id="email" type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" data-testid="auth-email" />
         </div>
         <div>
-          <label htmlFor="password" className="label">
+          <label /* @uxid apps/web/app/account/page::AuthForms.label-3 */ htmlFor="password" className="label">
             Password
           </label>
-          <input
+          <input /* @uxid apps/web/app/account/page::AuthForms.password */
             id="password"
             type="password"
             className="input"
@@ -102,11 +105,11 @@ function AuthForms() {
           {mode === "register" && <p className="mt-1 text-xs text-zinc-500">At least 8 characters, with an upper-case letter, a lower-case letter and a digit.</p>}
         </div>
         {error && (
-          <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-800" data-testid="auth-error">
+          <p /* @uxid apps/web/app/account/page::AuthForms.p */ role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-800" data-testid="auth-error">
             {error}
           </p>
         )}
-        <button type="submit" disabled={busy} className="btn btn-primary w-full py-3" data-testid="auth-submit">
+        <button /* @uxid apps/web/app/account/page::AuthForms.button-2 */ type="submit" disabled={busy} className="btn btn-primary w-full py-3" data-testid="auth-submit">
           {busy ? "Please wait…" : mode === "login" ? "Log in" : "Create account"}
         </button>
         {mode === "login" && <p className="text-center text-xs text-zinc-500">Demo account: demo@gymshop.test / Demo123!</p>}
@@ -115,6 +118,7 @@ function AuthForms() {
   );
 }
 
+// @uxid apps/web/app/account/page::Profile
 function Profile() {
   const { user, logout } = useAuth();
   const [orders, setOrders] = useState<Order[] | null>(null);
@@ -154,7 +158,7 @@ function Profile() {
             {user!.email}
           </p>
         </div>
-        <button onClick={() => logout()} className="btn btn-outline" data-testid="logout">
+        <button /* @uxid apps/web/app/account/page::Profile.button */ onClick={() => logout()} className="btn btn-outline" data-testid="logout">
           Log out
         </button>
       </section>
@@ -164,7 +168,7 @@ function Profile() {
           Order history
         </h2>
         {error && (
-          <p role="alert" className="mb-3 rounded-md bg-red-50 p-3 text-sm text-red-800" data-testid="orders-error">
+          <p /* @uxid apps/web/app/account/page::Profile.p */ role="alert" className="mb-3 rounded-md bg-red-50 p-3 text-sm text-red-800" data-testid="orders-error">
             {error}
           </p>
         )}
@@ -173,7 +177,7 @@ function Profile() {
         ) : orders.length === 0 ? (
           <div className="rounded-lg border border-dashed border-zinc-300 p-10 text-center text-zinc-500" data-testid="no-orders">
             You haven&apos;t placed any orders yet.{" "}
-            <Link href="/products" className="font-semibold text-brand underline">
+            <Link /* @uxid apps/web/app/account/page::Profile.link */ href="/products" className="font-semibold text-brand underline">
               Start shopping
             </Link>
           </div>
@@ -206,7 +210,7 @@ function Profile() {
                   ))}
                 </ul>
                 {o.status === "Placed" && (
-                  <button onClick={() => cancel(o.id)} className="btn btn-outline mt-3" data-testid="cancel-order">
+                  <button /* @uxid apps/web/app/account/page::Profile.button-2 */ onClick={() => cancel(o.id)} className="btn btn-outline mt-3" data-testid="cancel-order">
                     Cancel order
                   </button>
                 )}

@@ -7,6 +7,7 @@ import { useCart } from "@/components/cart-provider";
 import { api, ApiError, eur } from "@/lib/api";
 import type { Order, Shipping } from "@/lib/types";
 
+// @uxid apps/web/app/cart/page::CartPage
 export default function CartPage() {
   const { user, loading: authLoading } = useAuth();
   const { cart, loading, setQuantity, refresh } = useCart();
@@ -48,10 +49,10 @@ export default function CartPage() {
           Total paid: <span data-testid="order-total">{eur(placed.total)}</span>. No real payment was taken.
         </p>
         <div className="mt-6 flex justify-center gap-3">
-          <Link href="/account" className="btn btn-dark" data-testid="view-orders">
+          <Link /* @uxid apps/web/app/cart/page::CartPage.link */ href="/account" className="btn btn-dark" data-testid="view-orders">
             View my orders
           </Link>
-          <Link href="/products" className="btn btn-outline">
+          <Link /* @uxid apps/web/app/cart/page::CartPage.link-2 */ href="/products" className="btn btn-outline">
             Keep shopping
           </Link>
         </div>
@@ -65,7 +66,7 @@ export default function CartPage() {
       <div className="py-16 text-center" data-testid="cart-empty">
         <h1 className="text-2xl font-bold">Your cart is empty</h1>
         <p className="mt-2 text-zinc-600">Time to find some new gear.</p>
-        <Link href="/products" className="btn btn-primary mt-6">
+        <Link /* @uxid apps/web/app/cart/page::CartPage.link-3 */ href="/products" className="btn btn-primary mt-6">
           Browse products
         </Link>
       </div>
@@ -82,23 +83,23 @@ export default function CartPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={`/product-image/${line.productSlug}`} alt="" className="h-20 w-20 rounded-md object-cover" />
                 <div className="flex-1">
-                  <Link href={`/products/${line.productSlug}`} className="font-semibold hover:underline" data-testid="cart-line-name">
+                  <Link /* @uxid apps/web/app/cart/page::CartPage.link-4 */ href={`/products/${line.productSlug}`} className="font-semibold hover:underline" data-testid="cart-line-name">
                     {line.productName}
                   </Link>
                   <p className="text-sm text-zinc-500">
                     {line.color} · {line.size} · {eur(line.unitPrice)}
                   </p>
                   <div className="mt-2 flex items-center gap-2">
-                    <button className="btn btn-outline h-8 w-8 !p-0" onClick={() => change(line.variantId, line.quantity - 1)} aria-label={`Decrease quantity of ${line.productName}`} data-testid="qty-decrease">
+                    <button /* @uxid apps/web/app/cart/page::CartPage.button */ className="btn btn-outline h-8 w-8 !p-0" onClick={() => change(line.variantId, line.quantity - 1)} aria-label={`Decrease quantity of ${line.productName}`} data-testid="qty-decrease">
                       −
                     </button>
                     <span className="w-6 text-center" data-testid="cart-line-qty">
                       {line.quantity}
                     </span>
-                    <button className="btn btn-outline h-8 w-8 !p-0" onClick={() => change(line.variantId, line.quantity + 1)} aria-label={`Increase quantity of ${line.productName}`} data-testid="qty-increase">
+                    <button /* @uxid apps/web/app/cart/page::CartPage.button-2 */ className="btn btn-outline h-8 w-8 !p-0" onClick={() => change(line.variantId, line.quantity + 1)} aria-label={`Increase quantity of ${line.productName}`} data-testid="qty-increase">
                       +
                     </button>
-                    <button className="ml-3 text-sm text-red-700 hover:underline" onClick={() => change(line.variantId, 0)} data-testid="remove-line">
+                    <button /* @uxid apps/web/app/cart/page::CartPage.button-3 */ className="ml-3 text-sm text-red-700 hover:underline" onClick={() => change(line.variantId, 0)} data-testid="remove-line">
                       Remove
                     </button>
                   </div>
@@ -130,7 +131,7 @@ export default function CartPage() {
           </div>
 
           {error && (
-            <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-800" data-testid="cart-error">
+            <p /* @uxid apps/web/app/cart/page::CartPage.p */ role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-800" data-testid="cart-error">
               {error}
             </p>
           )}
@@ -138,12 +139,12 @@ export default function CartPage() {
           {!user ? (
             <div className="rounded-lg border border-zinc-200 bg-white p-4 text-sm" data-testid="checkout-login-prompt">
               <p className="mb-3">Log in or create an account to check out. Your cart will be kept.</p>
-              <Link href="/account?next=/cart" className="btn btn-primary w-full" data-testid="checkout-login">
+              <Link /* @uxid apps/web/app/cart/page::CartPage.link-5 */ href="/account?next=/cart" className="btn btn-primary w-full" data-testid="checkout-login">
                 Log in to check out
               </Link>
             </div>
           ) : (
-            <form onSubmit={checkout} className="space-y-3 rounded-lg border border-zinc-200 bg-white p-4" data-testid="checkout-form">
+            <form /* @uxid apps/web/app/cart/page::CartPage.form */ onSubmit={checkout} className="space-y-3 rounded-lg border border-zinc-200 bg-white p-4" data-testid="checkout-form">
               <h2 className="font-bold">Shipping details</h2>
               {(
                 [
@@ -155,14 +156,14 @@ export default function CartPage() {
                 ] as const
               ).map(([key, label]) => (
                 <div key={key}>
-                  <label htmlFor={`ship-${key}`} className="label">
+                  <label /* @uxid apps/web/app/cart/page::CartPage.label */ htmlFor={`ship-${key}`} className="label">
                     {label}
                   </label>
-                  <input id={`ship-${key}`} className="input" value={form[key]} onChange={(e) => setShipping({ ...shipping, [key]: e.target.value })} required data-testid={`shipping-${key}`} />
+                  <input /* @uxid apps/web/app/cart/page::CartPage.input */ id={`ship-${key}`} className="input" value={form[key]} onChange={(e) => setShipping({ ...shipping, [key]: e.target.value })} required data-testid={`shipping-${key}`} />
                 </div>
               ))}
               <p className="text-xs text-zinc-500">Demo store: no payment is taken.</p>
-              <button type="submit" disabled={submitting} className="btn btn-primary w-full py-3" data-testid="checkout-submit">
+              <button /* @uxid apps/web/app/cart/page::CartPage.button-4 */ type="submit" disabled={submitting} className="btn btn-primary w-full py-3" data-testid="checkout-submit">
                 {submitting ? "Placing order…" : `Place order · ${eur(cart.total)}`}
               </button>
             </form>

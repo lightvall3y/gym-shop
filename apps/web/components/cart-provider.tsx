@@ -33,6 +33,7 @@ const writeLocal = (items: CartInput[]) => localStorage.setItem(LS_KEY, JSON.str
  * Signed-in users have a server-side cart. Guests keep a list in localStorage that is priced by the
  * anonymous /cart/quote endpoint, then merged into the server cart on login.
  */
+// @uxid apps/web/components/cart-provider::CartProvider
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const [cart, setCart] = useState<Cart>(EMPTY);

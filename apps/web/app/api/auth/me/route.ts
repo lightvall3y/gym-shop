@@ -4,6 +4,7 @@ import { API_URL, TOKEN_COOKIE } from "@/lib/server-api";
 
 export const dynamic = "force-dynamic";
 
+// @uxid apps/web/app/api/auth/me/route::GET
 export async function GET() {
   const token = (await cookies()).get(TOKEN_COOKIE)?.value;
   if (!token) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
