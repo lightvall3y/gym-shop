@@ -6,3 +6,8 @@ obj
 .next
 *.log
 .vs
+
+.env.*
+!.env.example
+.vercel
+.env*

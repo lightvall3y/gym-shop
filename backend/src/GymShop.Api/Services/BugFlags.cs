@@ -1,4 +1,6 @@
-using System.Collections.Concurrent;
+using GymShop.Api.Data;
+using GymShop.Api.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymShop.Api.Services;
 
@@ -19,35 +21,34 @@ public static class Bug
 }
 
 /// <summary>
-/// Runtime-switchable bug toggles. Defaults come from the BUGS env var (comma-separated);
-/// they can be changed through /api/admin/flags and are restored by /api/admin/reset.
+/// Bug toggles. Defaults come from the BUGS env var (comma-separated); runtime overrides set through
+/// /api/admin/flags are stored in the database, so it works with several API instances (e.g. on Vercel).
+/// Scoped: loaded once at the start of each request (see Program.cs), then read synchronously via Is().
 /// </summary>
-public class BugFlags
+public class BugFlags(IConfiguration config, AppDbContext db)
 {
-    private readonly ConcurrentDictionary<string, bool> _flags = new();
-    private readonly HashSet<string> _defaults;
+    private readonly HashSet<string> _defaults = (config["BUGS"] ?? "")
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-    public BugFlags(IConfiguration config)
-    {
-        _defaults = (config["BUGS"] ?? "")
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        ResetToDefaults();
-    }
+    private Dictionary<string, bool> _overrides = new();
 
-    public bool Is(string key) => _flags.TryGetValue(key, out var on) && on;
+    public async Task LoadAsync(CancellationToken ct = default) =>
+        _overrides = await db.FeatureFlags.AsNoTracking().ToDictionaryAsync(f => f.Key, f => f.Enabled, ct);
+
+    public bool Is(string key) => _overrides.TryGetValue(key, out var on) ? on : _defaults.Contains(key);
 
     public IReadOnlyDictionary<string, bool> Snapshot() => Bug.All.ToDictionary(k => k, Is);
 
-    public bool Set(string key, bool enabled)
+    public async Task SetAsync(IReadOnlyDictionary<string, bool> flags, CancellationToken ct = default)
     {
-        if (!Bug.All.Contains(key)) return false;
-        _flags[key] = enabled;
-        return true;
-    }
-
-    public void ResetToDefaults()
-    {
-        foreach (var key in Bug.All) _flags[key] = _defaults.Contains(key);
+        var existing = await db.FeatureFlags.ToDictionaryAsync(f => f.Key, ct);
+        foreach (var (key, enabled) in flags)
+        {
+            if (existing.TryGetValue(key, out var row)) row.Enabled = enabled;
+            else db.FeatureFlags.Add(new FeatureFlag { Key = key, Enabled = enabled });
+        }
+        await db.SaveChangesAsync(ct);
+        await LoadAsync(ct);
     }
 }

@@ -16,12 +16,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
         base.OnModelCreating(b);
 
         b.Entity<Category>().HasIndex(c => c.Slug).IsUnique();
+        b.Entity<FeatureFlag>().HasKey(f => f.Key);
+        b.Entity<FeatureFlag>().Property(f => f.Key).HasMaxLength(64);
 
         b.Entity<Product>(e =>
         {

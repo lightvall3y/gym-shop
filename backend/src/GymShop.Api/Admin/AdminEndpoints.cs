@@ -28,18 +28,18 @@ public static class AdminEndpoints
             await db.Database.ExecuteSqlRawAsync($"TRUNCATE TABLE {string.Join(", ", tables)} RESTART IDENTITY CASCADE");
             db.ChangeTracker.Clear();
             await Seeder.SeedAsync(db, users);
-            flags.ResetToDefaults();
+            await flags.LoadAsync(); // the flag overrides were truncated with everything else -> back to env defaults
             return Results.Ok(new { status = "reset", flags = flags.Snapshot() });
         });
 
         g.MapGet("/flags", (BugFlags flags) => Results.Ok(flags.Snapshot()));
 
-        g.MapPut("/flags", (SetFlagsRequest req, BugFlags flags) =>
+        g.MapPut("/flags", async (SetFlagsRequest req, BugFlags flags) =>
         {
             var unknown = req.Flags.Keys.Where(k => !Bug.All.Contains(k)).ToList();
             if (unknown.Count > 0)
                 return ApiResults.Error(400, $"Unknown flag(s): {string.Join(", ", unknown)}. Known: {string.Join(", ", Bug.All)}");
-            foreach (var (key, on) in req.Flags) flags.Set(key, on);
+            await flags.SetAsync(req.Flags);
             return Results.Ok(flags.Snapshot());
         });
 

@@ -139,15 +139,56 @@ So the browser never talks to the C# API directly (no CORS, no tokens in JavaScr
 Database changes: `cd backend && SEED_ON_START=false dotnet ef migrations add <Name> --project src/GymShop.Api --output-dir Data/Migrations`
 (the EF tool is pinned in `backend/dotnet-tools.json`; run `dotnet tool restore` once).
 
-## Deploying later
+## Deploying
 
-Everything is containerized, so any container platform works (Azure Container Apps, Fly.io, Railway, ECS, a VM with
-compose…). Vercel is not an option as-is: it hosts Next.js but cannot run the .NET API or Postgres.
+### Vercel (current setup)
 
-- **web** image (`apps/web/Dockerfile`, build context = repo root): set `API_URL` (internal URL of the API) and
-  `COOKIE_SECURE=true` once served over HTTPS.
-- **api** image (`backend/src/GymShop.Api/Dockerfile`, build context = `backend/`): set `DATABASE_URL`, a long random
-  `JWT_SECRET`, `ADMIN_API_KEY` (or leave empty to disable the admin API), `ANTHROPIC_API_KEY` (or `ANTHROPIC_AUTH_TOKEN` + `ANTHROPIC_BASE_URL`), `CHAT_MODEL`.
-  The API only needs to be reachable by the web app; keep port 5080 / admin private unless Eva has to reach it.
-- **Postgres**: managed instance or container with a volume.
-- The built-in default for `JWT_SECRET` and `ADMIN_API_KEY` is for local use only.
+Two Vercel projects in team `asly1`, plus a Neon Postgres from the Vercel Marketplace:
+
+| Project | What | Root directory | URL |
+|---|---|---|---|
+| `gym-shop-web` | Next.js (native Vercel build) | `apps/web` | https://gym-shop-web.vercel.app |
+| `gym-shop-api` | C# API, built from `backend/Dockerfile` with Vercel's Container runtime (beta) | `backend` | https://gym-shop-api.vercel.app |
+| `gym-shop-db` | Neon Postgres (region `iad1`) | | connected to `gym-shop-api` |
+
+Browsers only talk to the web app; it proxies `/api/*` to the API (`API_URL`). Eva and scripts call the API directly for `/api/admin/*`.
+Production secrets (`ADMIN_API_KEY`, `JWT_SECRET`) were generated at setup; a local copy is in `.env.vercel.local` (git-ignored).
+
+Env vars: web has `API_URL` and `COOKIE_SECURE=true`. API has `PORT=8080`, `SEED_ON_START=false`, `ADMIN_API_KEY`, `JWT_SECRET`, the Neon
+variables (the API prefers `DATABASE_URL_UNPOOLED`), and optionally `ANTHROPIC_*` / `CHAT_MODEL` for the chatbot.
+
+Redeploy (from the repo root for web, from `backend/` for the API):
+
+```bash
+vercel deploy --prod --yes                 # in gym-shop/      -> gym-shop-web
+cd backend && vercel deploy --prod --yes   # in gym-shop/backend -> gym-shop-api
+```
+
+After adding a migration, run it once against the production database *before* deploying the API, because the API
+doesn't migrate on start in production (cold starts stay fast):
+
+```bash
+cd backend && vercel env pull /tmp/prod.env --environment production --yes
+docker build -t gym-shop-api . && docker run --rm -e MIGRATE_ONLY=true \
+  -e DATABASE_URL="$(grep ^DATABASE_URL_UNPOOLED= /tmp/prod.env | cut -d= -f2- | tr -d '"')" gym-shop-api
+rm /tmp/prod.env
+```
+
+`POST /api/admin/reset` also migrates and re-seeds at any time.
+
+Things to know about the Vercel setup:
+- The container runtime is **beta**. Instances scale to zero after 5 minutes idle, so the first request after a quiet period is slower.
+- Bug flags are stored in the database (not memory), because several API instances can run at once.
+- The API is publicly reachable (Eva needs it). The only protection for `/api/admin/*` is the `ADMIN_API_KEY`.
+- Test production the same way as local: `node scripts/smoke-api.mjs <api-url> <admin-key>` and
+  `WEB_URL=... API_URL=... ADMIN_API_KEY=... pnpm --filter web test:e2e`. Both reset the production data.
+- Adding the chatbot: `vercel env add ANTHROPIC_API_KEY -e production` (or `ANTHROPIC_BASE_URL` + `ANTHROPIC_AUTH_TOKEN` + `CHAT_MODEL`
+  in `backend/`), then redeploy the API.
+
+### Any other container platform
+
+The same images run anywhere (Azure Container Apps, Fly.io, Railway, a VM with compose...):
+- **web** (`apps/web/Dockerfile`, context = repo root): `API_URL`, `COOKIE_SECURE=true` over HTTPS.
+- **api** (`backend/Dockerfile`, context = `backend/`): `DATABASE_URL` (Npgsql string or `postgres://` URL), `JWT_SECRET`,
+  `ADMIN_API_KEY` (empty disables the admin API), chat settings, `PORT` if the platform sets one.
+- The default `JWT_SECRET` / `ADMIN_API_KEY` are for local use only.

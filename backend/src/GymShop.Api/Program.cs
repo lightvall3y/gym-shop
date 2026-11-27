@@ -13,9 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 // --- Database ---
+// DATABASE_URL may be an Npgsql connection string or a postgres:// URL.
+// DATABASE_URL_UNPOOLED (set by the Neon integration on Vercel) wins: EF Core migrations take advisory locks,
+// which don't work through a transaction-pooling proxy.
 builder.Services.AddDbContext<AppDbContext>(o =>
-    o.UseNpgsql(config.GetConnectionString("Default") ?? config["DATABASE_URL"]
-        ?? "Host=localhost;Port=5432;Database=gymshop;Username=gymshop;Password=gymshop"));
+    o.UseNpgsql(ConnectionStrings.Normalize(config.GetConnectionString("Default") ?? config["DATABASE_URL_UNPOOLED"] ?? config["DATABASE_URL"]
+        ?? "Host=localhost;Port=5432;Database=gymshop;Username=gymshop;Password=gymshop")));
+
+// Container platforms (Vercel, Cloud Run, ...) tell the app which port to listen on via PORT.
+if (!string.IsNullOrWhiteSpace(config["PORT"])) builder.WebHost.UseUrls($"http://0.0.0.0:{config["PORT"]}");
 
 // --- Identity (users, password hashing) + JWT bearer auth ---
 builder.Services.AddIdentityCore<AppUser>(o =>
@@ -42,7 +48,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // --- App services ---
-builder.Services.AddSingleton<BugFlags>();
+builder.Services.AddScoped<BugFlags>();
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddScoped<PricingService>();
 builder.Services.AddScoped<ChatService>();
@@ -66,6 +72,20 @@ app.UseExceptionHandler(errApp => errApp.Run(async ctx =>
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Load the bug-flag overrides once per API request (cheap query; keeps all API instances consistent).
+app.Use(async (ctx, next) =>
+{
+    if (ctx.Request.Path.StartsWithSegments("/api"))
+    {
+        try { await ctx.RequestServices.GetRequiredService<BugFlags>().LoadAsync(ctx.RequestAborted); }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            ctx.RequestServices.GetRequiredService<ILogger<Program>>().LogWarning("Could not load bug flags: {Message}", ex.Message);
+        }
+    }
+    await next();
+});
+
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuth();
 app.MapCatalog();
@@ -75,7 +95,10 @@ app.MapChat();
 app.MapAdmin();
 
 // --- Startup: migrate + seed ---
-if (config.GetValue("SEED_ON_START", true))
+// SEED_ON_START=true (default) migrates and seeds before accepting traffic (docker compose).
+// MIGRATE_ONLY=true does the same and then exits: run it once per deploy where cold starts must be fast (Vercel).
+var migrateOnly = config.GetValue("MIGRATE_ONLY", false);
+if (migrateOnly || config.GetValue("SEED_ON_START", true))
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -95,6 +118,12 @@ if (config.GetValue("SEED_ON_START", true))
             await Task.Delay(2000);
         }
     }
+}
+
+if (migrateOnly)
+{
+    app.Logger.LogInformation("Migration and seeding finished; exiting (MIGRATE_ONLY).");
+    return;
 }
 
 app.Run();

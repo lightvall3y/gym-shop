@@ -202,6 +202,20 @@ namespace GymShop.Api.Data.Migrations
                     b.ToTable("ChatSessions");
                 });
 
+            modelBuilder.Entity("GymShop.Api.Domain.FeatureFlag", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("FeatureFlags");
+                });
+
             modelBuilder.Entity("GymShop.Api.Domain.Order", b =>
                 {
                     b.Property<Guid>("Id")

@@ -23,7 +23,7 @@ services:
   api:
     build:
       context: ./backend
-      dockerfile: src/GymShop.Api/Dockerfile
+      dockerfile: Dockerfile
     environment:
       DATABASE_URL: Host=db;Port=5432;Database=gymshop;Username=gymshop;Password=gymshop
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-at-least-32-characters-long}

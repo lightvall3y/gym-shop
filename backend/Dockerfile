@@ -4,7 +4,7 @@ WORKDIR /src
 COPY src/GymShop.Api/GymShop.Api.csproj src/GymShop.Api/
 RUN dotnet restore src/GymShop.Api/GymShop.Api.csproj
 COPY src/GymShop.Api src/GymShop.Api
-RUN dotnet publish src/GymShop.Api/GymShop.Api.csproj -c Release -o /app --no-restore
+RUN dotnet publish src/GymShop.Api/GymShop.Api.csproj -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
