@@ -1,0 +1,62 @@
+# Local stack: Postgres + C# API + Next.js web.
+#   docker compose up --build        then open http://localhost:3001
+# All settings have defaults; copy .env.example to .env to override them.
+name: gym-shop
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: gymshop
+      POSTGRES_PASSWORD: gymshop
+      POSTGRES_DB: gymshop
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5433}:5432" # 5433 on the host so it doesn't clash with a local Postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gymshop -d gymshop"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: src/GymShop.Api/Dockerfile
+    environment:
+      DATABASE_URL: Host=db;Port=5432;Database=gymshop;Username=gymshop;Password=gymshop
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-at-least-32-characters-long}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-dev-admin-key}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CHAT_MODEL: ${CHAT_MODEL:-claude-haiku-5-5}
+      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL:-} # point at scripts/mock-anthropic.mjs: http://host.docker.internal:9090/
+      BUGS: ${BUGS:-}
+      SEED_ON_START: ${SEED_ON_START:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-5080}:8080" # used by Eva / scripts for /api/admin/*; the browser goes through the web app
+    healthcheck:
+      # The port only opens after migrations + seeding are done.
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8080'"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      API_URL: http://api:8080
+      COOKIE_SECURE: ${COOKIE_SECURE:-false} # set to true when serving over HTTPS
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-3001}:3001"
+
+volumes:
+  db-data:

@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GymShop.Api/GymShop.Api.csproj" />
+  </Folder>
+</Solution>

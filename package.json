@@ -1,0 +1,20 @@
+{
+  "name": "gym-shop",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Dummy gym clothes webshop used as a test target for Eva",
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "dotnet run --project backend/src/GymShop.Api",
+    "build": "pnpm --filter web build && dotnet build backend/GymShop.sln",
+    "lint": "pnpm --filter web lint",
+    "typecheck": "pnpm --filter web typecheck",
+    "test": "node scripts/smoke-api.mjs && pnpm --filter web test:e2e",
+    "smoke": "node scripts/smoke-api.mjs",
+    "compose:up": "docker compose up --build",
+    "compose:down": "docker compose down",
+    "reset": "curl -s -X POST http://localhost:5080/api/admin/reset -H \"X-Admin-Key: ${ADMIN_API_KEY:-dev-admin-key}\"",
+    "mock-llm": "node scripts/mock-anthropic.mjs"
+  },
+  "packageManager": "pnpm@12.23.0"
+}
