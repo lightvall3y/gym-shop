@@ -18,6 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title: product?.name ?? "Product not found" };
 }
 
+// @uxid apps/web/app/products/[slug]/page::ProductPage
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const product = await getProduct((await params).slug);
   if (!product) notFound();
@@ -25,11 +26,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <div>
       <nav className="mb-4 text-sm text-zinc-500" aria-label="Breadcrumb">
-        <Link href="/products" className="hover:underline">
+        <Link /* @uxid apps/web/app/products/[slug]/page::ProductPage.link */ href="/products" className="hover:underline">
           Shop
         </Link>{" "}
         /{" "}
-        <Link href={`/products?category=${product.categorySlug}`} className="hover:underline">
+        <Link /* @uxid apps/web/app/products/[slug]/page::ProductPage.link-2 */ href={`/products?category=${product.categorySlug}`} className="hover:underline">
           {product.category}
         </Link>
       </nav>

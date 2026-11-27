@@ -2,9 +2,10 @@ import Link from "next/link";
 import { eur } from "@/lib/api";
 import type { ProductSummary } from "@/lib/types";
 
+// @uxid apps/web/components/product-card::ProductCard
 export function ProductCard({ product }: { product: ProductSummary }) {
   return (
-    <Link
+    <Link /* @uxid apps/web/components/product-card::ProductCard.link */
       href={`/products/${product.slug}`}
       className="group overflow-hidden rounded-lg border border-zinc-200 bg-white transition-shadow hover:shadow-md"
       data-testid="product-card"

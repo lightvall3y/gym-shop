@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   description: "Gym clothes, shoes and accessories. (Demo store: nothing is real, nothing ships.)",
 };
 
+// @uxid apps/web/app/layout::RootLayout
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -23,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-zinc-500">
                 <p>© Gym Shop. Demo store used for testing: nothing is real and nothing ships.</p>
                 <p>
-                  <Link href="/products" className="hover:underline">
+                  <Link /* @uxid apps/web/app/layout::RootLayout.link */ href="/products" className="hover:underline">
                     Shop
                   </Link>{" "}
                   · Free shipping over €100 · 30-day returns
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ChatWidget />
           </CartProvider>
         </AuthProvider>
+        <script src="https://dev.runeva.ai/eval-bot.js" data-eval-key="evalpk_z15Kf9aWtoG9XoRqKadmKT-XWTjE6QEB" data-eval-endpoint="https://dev.runeva.ai" defer></script>
       </body>
     </html>
   );

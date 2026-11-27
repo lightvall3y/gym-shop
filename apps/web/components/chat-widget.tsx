@@ -9,6 +9,7 @@ type ChatEvent = { type: "session" | "text" | "tool" | "error" | "done"; text?: 
 const TOOL_LABELS: Record<string, string> = {
   search_products: "Searching the catalog…",
   check_stock: "Checking stock…",
+  // @uxid apps/web/components/chat-widget::TOOL_LABELS.get_return_policy
   get_return_policy: "Reading the returns policy…",
   list_my_orders: "Looking up your orders…",
   get_order_status: "Checking your order…",
@@ -22,12 +23,14 @@ const GREETING = "Hi! I'm Gia, Gym Shop's support assistant. I can help with ord
  * The panel is keyed by user id, so logging in or out starts a fresh conversation
  * (the backend ties chat sessions to the user), while the open/closed state is kept.
  */
+// @uxid apps/web/components/chat-widget::ChatWidget
 export function ChatWidget() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   return <ChatPanel key={user?.id ?? "guest"} open={open} setOpen={setOpen} />;
 }
 
+// @uxid apps/web/components/chat-widget::ChatPanel
 function ChatPanel({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -95,7 +98,7 @@ function ChatPanel({ open, setOpen }: { open: boolean; setOpen: (open: boolean) 
 
   if (!open) {
     return (
-      <button
+      <button /* @uxid apps/web/components/chat-widget::ChatPanel.button */
         onClick={() => setOpen(true)}
         className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-brand px-5 py-3 font-semibold text-white shadow-lg hover:bg-brand-dark"
         aria-label="Open support chat"
@@ -107,7 +110,7 @@ function ChatPanel({ open, setOpen }: { open: boolean; setOpen: (open: boolean) 
   }
 
   return (
-    <section
+    <section /* @uxid apps/web/components/chat-widget::ChatPanel.section */
       role="dialog"
       aria-label="Support chat"
       className="fixed bottom-5 right-5 z-40 flex h-[32rem] max-h-[calc(100vh-2.5rem)] w-96 max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl"
@@ -118,7 +121,7 @@ function ChatPanel({ open, setOpen }: { open: boolean; setOpen: (open: boolean) 
           <p className="font-semibold">Gia · Support</p>
           <p className="text-xs text-zinc-400">AI assistant</p>
         </div>
-        <button onClick={() => setOpen(false)} className="rounded p-1 hover:bg-zinc-800" aria-label="Close support chat" data-testid="chat-close">
+        <button /* @uxid apps/web/components/chat-widget::ChatPanel.button-2 */ onClick={() => setOpen(false)} className="rounded p-1 hover:bg-zinc-800" aria-label="Close support chat" data-testid="chat-close">
           ✕
         </button>
       </header>
@@ -130,7 +133,7 @@ function ChatPanel({ open, setOpen }: { open: boolean; setOpen: (open: boolean) 
         {messages.length === 0 && (
           <div className="flex flex-wrap gap-2">
             {SUGGESTIONS.map((s) => (
-              <button key={s} onClick={() => send(s)} className="rounded-full border border-zinc-300 px-3 py-1 text-xs hover:bg-zinc-100" data-testid="chat-suggestion">
+              <button /* @uxid apps/web/components/chat-widget::ChatPanel.button-3 */ key={s} onClick={() => send(s)} className="rounded-full border border-zinc-300 px-3 py-1 text-xs hover:bg-zinc-100" data-testid="chat-suggestion">
                 {s}
               </button>
             ))}
@@ -160,14 +163,14 @@ function ChatPanel({ open, setOpen }: { open: boolean; setOpen: (open: boolean) 
         <div ref={bottom} />
       </div>
 
-      <form
+      <form /* @uxid apps/web/components/chat-widget::ChatPanel.form */
         className="flex gap-2 border-t border-zinc-200 p-3"
         onSubmit={(e) => {
           e.preventDefault();
           send(input);
         }}
       >
-        <input
+        <input /* @uxid apps/web/components/chat-widget::ChatPanel.input */
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about orders, sizing, returns…"
@@ -176,7 +179,7 @@ function ChatPanel({ open, setOpen }: { open: boolean; setOpen: (open: boolean) 
           aria-label="Message"
           data-testid="chat-input"
         />
-        <button type="submit" disabled={busy || !input.trim()} className="btn btn-primary" data-testid="chat-send">
+        <button /* @uxid apps/web/components/chat-widget::ChatPanel.button-4 */ type="submit" disabled={busy || !input.trim()} className="btn btn-primary" data-testid="chat-send">
           Send
         </button>
       </form>

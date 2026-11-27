@@ -14,6 +14,7 @@ type AuthContext = {
 
 const Ctx = createContext<AuthContext | null>(null);
 
+// @uxid apps/web/components/auth-provider::AuthProvider
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

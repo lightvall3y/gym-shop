@@ -3,6 +3,7 @@ import { ProductCard } from "@/components/product-card";
 import { apiGet } from "@/lib/server-api";
 import type { Category, Paged, ProductSummary } from "@/lib/types";
 
+// @uxid apps/web/app/page::HomePage
 export default async function HomePage() {
   const [featured, categories] = await Promise.all([
     apiGet<Paged<ProductSummary>>("/api/products?featured=true&pageSize=8"),
@@ -16,10 +17,10 @@ export default async function HomePage() {
         <h1 className="mt-2 max-w-xl text-4xl font-extrabold leading-tight sm:text-5xl">Gear that keeps up with your training.</h1>
         <p className="mt-4 max-w-lg text-zinc-300">Clothes, shoes and accessories for lifting, running and everything in between. Free shipping over €100.</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/products" className="btn btn-primary" data-testid="hero-shop-all">
+          <Link /* @uxid apps/web/app/page::HomePage.link */ href="/products" className="btn btn-primary" data-testid="hero-shop-all">
             Shop all
           </Link>
-          <Link href="/products?category=shoes" className="btn btn-outline" data-testid="hero-shop-shoes">
+          <Link /* @uxid apps/web/app/page::HomePage.link-2 */ href="/products?category=shoes" className="btn btn-outline" data-testid="hero-shop-shoes">
             Shop shoes
           </Link>
         </div>
@@ -31,7 +32,7 @@ export default async function HomePage() {
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {categories.map((c) => (
-            <Link
+            <Link /* @uxid apps/web/app/page::HomePage.link-3 */
               key={c.slug}
               href={`/products?category=${c.slug}`}
               className="rounded-lg border border-zinc-200 bg-white p-5 text-center font-semibold hover:border-brand hover:text-brand"
